@@ -1,0 +1,505 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+:root {
+  /* --- 🎨 NEW COLOR PALETTE --- */
+  --primary-color: #38a832; /* NEW: Dark green from 2nd image */
+  --secondary-color: #10ac84; /* Old green as a secondary accent */
+  
+  /* NEW: Gradient for 'Let's Talk' button from 1st image */
+  --accent-gradient: linear-gradient(160deg, #28b485, #a2e247); 
+  --accent-button-text: #202124; /* NEW: Dark text for gradient (black/dark grey) */
+  
+  --text-dark: #202124;
+  --text-medium: #5f6368;
+  --text-light: #70757a;
+  --bg-light: #f8f9fa;
+  --card-bg: #ffffff;
+  --border-color: #dadce0;
+  
+  /* UI Element Styles */
+  --border-radius-lg: 16px;
+  --border-radius-md: 12px;
+  --border-radius-sm: 8px;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- 💎 Header --- */
+.header {
+  background-color: var(--card-bg);
+  padding: 15px 40px;
+  border-radius: 0;
+  box-shadow: var(--card-shadow);
+  
+  position: fixed; 
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; 
+}
+
+.container {
+  padding-top: 0;
+}
+
+.logo-link {
+  text-decoration: none;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px; /* This will be ignored now, which is fine */
+}
+
+/* --- 🛠️ THIS IS THE LOGO FIX --- */
+.logo {
+  height: 32px;  /* Set a fixed height for the header */
+  width: auto;   /* Let the width adjust automatically */
+  margin-right: 0;
+  border-radius: 4px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.4em;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.main-nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+}
+
+.main-nav li {
+  margin-left: 15px;
+}
+
+/* --- 🚀 Nav Button Animations (Updated for Green) --- */
+.main-nav a {
+  text-decoration: none;
+  color: var(--text-medium);
+  font-weight: 500;
+  font-size: 0.95em;
+  padding: 8px 12px;
+  border-radius: var(--border-radius-sm);
+  transition: all 0.3s ease;
+  display: inline-block;
+  position: relative;
+}
+
+/* Hover for regular buttons */
+.main-nav a:hover:not(.button-accent),
+.main-nav a:active:not(.button-accent) {
+  color: #ffffff; /* White text */
+  background-color: var(--primary-color); /* NEW: Main green background */
+  transform: translateY(-2px); /* Subtle pop up */
+  box-shadow: 0 4px 10px rgba(56, 168, 50, 0.3); /* NEW: Green shadow */
+}
+
+/* Base button style (for 'Let's Talk') */
+.button {
+  padding: 10px 20px;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  text-align: center;
+  display: inline-block;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+/* --- 🔒 BULLETPROOF FIX FOR 'LET'S TALK' FONT --- */
+.main-nav a.button-accent {
+  background: var(--accent-gradient);
+  color: #202124 !important; /* <--- THIS IS THE GUARANTEED FIX */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  margin-left: 15px;
+}
+
+.main-nav a.button-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: #202124 !important; /* <--- Keep it dark on hover too */
+}
+/* --- End of Header & Nav Styles --- */
+
+/* --- 🌟 Hero Section Layout --- */
+.hero-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 0 80px 0;
+  min-height: 600px;
+  background-color: var(--bg-light);
+  gap: 40px;
+}
+
+.hero-left {
+  flex: 1;
+  max-width: 50%;
+  padding-right: 20px;
+}
+
+.hero-left h2 {
+  font-size: 3.2em;
+  font-weight: 700;
+  color: var(--text-dark);
+  line-height: 1.1;
+  margin-bottom: 20px;
+}
+
+.hero-left p {
+  font-size: 1.2em;
+  color: var(--text-medium);
+  line-height: 1.5;
+  margin-bottom: 30px;
+}
+
+/* --- Form Card & Inputs --- */
+.hero-right {
+  flex: 0 0 440px;
+  max-width: 440px;
+  background-color: var(--card-bg);
+  padding: 35px 30px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.hero-right .card {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.hero-right h3 {
+  font-size: 1.8em;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-top: 0;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.hero-right .tagline {
+  font-size: 0.95em;
+  color: var(--text-light);
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.hero-right .form-group {
+  margin-bottom: 16px;
+}
+
+.hero-right .form-group input[type="text"],
+.hero-right .form-group input[type="email"],
+.hero-right .form-group select {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  padding: 12px 16px;
+  border-radius: var(--border-radius-md);
+  color: var(--text-dark);
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 0.95em;
+  font-family: 'Poppins', sans-serif;
+}
+.hero-right .form-group input::placeholder {
+    color: var(--text-light);
+}
+
+.hero-right .form-group input:focus,
+.hero-right .form-group select:focus {
+  border-color: var(--primary-color); /* NEW: Green focus border */
+  box-shadow: 0 0 0 3px rgba(56, 168, 50, 0.15); /* NEW: Green focus shadow */
+  outline: none;
+}
+
+/* Dropdown arrow */
+.hero-right .form-group select {
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%235f6368" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+
+/* Form submit button */
+.hero-right button[type="submit"] {
+  background-color: var(--primary-color); /* NEW: Main green background */
+  color: white;
+  padding: 14px 25px;
+  font-size: 1.05em;
+  border-radius: var(--border-radius-md);
+  width: 100%;
+  margin-top: 10px;
+  transition: all 0.3s ease; /* Added transition */
+  border: none; /* Added */
+  cursor: pointer; /* Added */
+}
+
+.hero-right button[type="submit"]:hover {
+  background-color: #31942c; /* NEW: Darker green */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(56, 168, 50, 0.3); /* NEW: Green shadow */
+}
+
+/* --- General Card Styling (for sections below hero) --- */
+.card {
+  background-color: var(--card-bg);
+  padding: 40px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--card-shadow);
+  margin: 40px auto;
+  max-width: 900px;
+}
+
+.card h2 {
+  color: var(--text-dark);
+  font-size: 2.2em;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 30px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 15px;
+}
+
+/* --- Job/Advantage Item Styling --- */
+.job-item, .advantage-item {
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 25px;
+  margin-bottom: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  cursor: pointer;
+}
+
+.job-item h3, .advantage-item h3 {
+  color: var(--primary-color); /* NEW: Titles are now green */
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.4em;
+  font-weight: 600;
+}
+
+.job-item p, .advantage-item p {
+  font-size: 1em;
+  color: var(--text-medium);
+  margin-bottom: 0;
+}
+
+/* Refined Bounce/Lift Animation */
+.bounce-animation:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--primary-color); /* NEW: Green accent border */
+}
+
+.bounce-animation:active {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow);
+}
+
+/* --- Testimonials --- */
+.testimonial-item {
+  background-color: var(--bg-light);
+  border-left: 5px solid var(--secondary-color);
+  padding: 25px;
+  margin-bottom: 20px;
+  border-radius: var(--border-radius-md);
+  font-style: italic;
+}
+
+.testimonial-item p {
+  margin: 0 0 10px 0;
+  color: var(--text-medium);
+  font-size: 1.05em;
+}
+
+.testimonial-author {
+  font-weight: 600;
+  color: var(--primary-color); /* NEW: Author name is green */
+  text-align: right;
+  font-size: 0.95em;
+  font-style: normal;
+}
+
+footer {
+  text-align: center;
+  margin-top: 50px;
+  padding: 30px;
+  color: var(--text-light);
+  font-size: 0.9em;
+  border-top: 1px solid var(--border-color);
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 992px) {
+  .container {
+    padding: 0 15px;
+  }
+
+  .header {
+    padding: 15px 20px;
+  }
+
+  .hero-section {
+    flex-direction: column;
+    padding: 100px 0 50px 0;
+    min-height: auto;
+  }
+
+  .hero-left, .hero-right {
+    max-width: 100%;
+    padding: 0 15px;
+    flex: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .hero-left {
+      text-align: center;
+      margin-bottom: 30px;
+  }
+  
+  .hero-right {
+      max-width: 500px;
+      margin: 0 auto;
+  }
+
+  .hero-left h2 {
+    font-size: 2.5em;
+  }
+
+  .hero-left p {
+    font-size: 1.1em;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column; 
+    padding: 15px;
+    align-items: flex-start;
+  }
+  
+  .logo-link {
+      margin-bottom: 15px;
+      width: 100%;
+  }
+
+  .main-nav {
+      width: 100%;
+  }
+
+  .main-nav ul {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .main-nav li {
+    margin-left: 0;
+    margin-bottom: 8px;
+    width: 100%;
+  }
+  
+  .main-nav a {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    border-radius: var(--border-radius-sm);
+  }
+  
+  /* Mobile hover for REGULAR buttons */
+  .main-nav a:hover:not(.button-accent),
+  .main-nav a:active:not(.button-accent) {
+    color: #ffffff;
+    background-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(56, 168, 50, 0.3); /* NEW: Green shadow */
+  }
+  
+  /* Mobile hover for ACCENT button */
+  .main-nav a.button-accent {
+      margin-left: 0;
+      margin-top: 10px;
+  }
+  .main-nav a.button-accent:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .card {
+    padding: 30px 20px;
+  }
+
+  .card h2 {
+    font-size: 2em;
+  }
+
+  .hero-left h2 {
+      font-size: 2em;
+  }
+  .hero-left p {
+      font-size: 1em;
+  }
+}
+
+@media (max-width: 480px) {
+  .header h1 {
+    font-size: 1.2em;
+  }
+
+  .logo {
+    height: 28px; /* Adjusted mobile logo height */
+    width: auto;
+  }
+
+  .card h2 {
+    font-size: 1.8em;
+  }
+
+  .hero-right {
+      padding: 25px 20px;
+  }
+  .hero-right h3 {
+      font-size: 1.5em;
+  }
+}
