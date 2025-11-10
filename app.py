@@ -1,89 +1,170 @@
 # app.py
-import json
+from flask import Flask, render_template, request, flash, redirect, url_for, session, send_file, render_template_string
+from models import db, Contact
+from config import Config
 from datetime import datetime
-from flask import Flask, render_template, request, jsonify, abort
+from pathlib import Path
+import csv
+from io import StringIO
 
-app = Flask(__name__)
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
 
-# ------------------------------------------------------------------
-# Data that used to live in the HTML (or in a separate sheet)
-# ------------------------------------------------------------------
-STATES = [
-    "Johor","Kedah","Kelantan","Malacca","Negeri Sembilan","Pahang",
-    "Penang","Perak","Perlis","Sabah","Sarawak","Selangor",
-    "Terengganu","Kuala Lumpur","Labuan","Putrajaya"
-]
+    # Ensure DB path
+    db_path = app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')
+    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
 
-JOBS = ["Virtual Assistant","Marketing Assistant","Data Entry Specialist","Other"]
+    db.init_app(app)
 
-AVAILABILITIES = ["Full-time","Part-time","Flexible"]
+    with app.app_context():
+        db.create_all()
+        print("Database ready → instance/app.db")
 
-LATEST_JOBS = [
-    {"title":"Virtual Assistant","description":"Support businesses remotely with administrative tasks, scheduling, email management, and more. Flexibility is key!"},
-    {"title":"Marketing Assistant","description":"Help execute marketing campaigns, manage social media, create content, and analyze performance from anywhere."},
-    {"title":"Data Entry Specialist","description":"Accurately input and manage data for various projects. Attention to detail and efficiency are highly valued."}
-]
+    # --------------------------------------------------
+    # LOGIN REQUIRED DECORATOR
+    # --------------------------------------------------
+    def login_required(f):
+        from functools import wraps
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            if not session.get('logged_in'):
+                return redirect(url_for('login'))
+            return f(*args, **kwargs)
+        return decorated
 
-ADVANTAGES = [
-    {"title":"Verified Listings","description":"We thoroughly vet all job opportunities to ensure legitimacy and a safe working environment for our users."},
-    {"title":"Flexible Hours","description":"Our platform focuses on jobs that offer the freedom to work on your own schedule, fitting perfectly into your life."},
-    {"title":"Reliable Payments","description":"Rest assured, we partner with employers who are committed to timely and secure payments for your hard work."}
-]
+    # --------------------------------------------------
+    # LOGIN ROUTE
+    # --------------------------------------------------
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        if request.method == 'POST':
+            username = request.form.get('username')
+            password = request.form.get('password')
+            if (username == app.config['ADMIN_USERNAME'] and
+                password == app.config['ADMIN_PASSWORD']):
+                session['logged_in'] = True
+                flash('Login successful!', 'success')
+                return redirect(url_for('admin'))
+            else:
+                flash('Invalid credentials.', 'error')
+        return render_template('login.html')
 
-TESTIMONIALS = [
-    {"quote":"EasyEarn helped me find a remote job that perfectly fits my family schedule. The process was smooth and the support was excellent!","author":"Sarah L., Virtual Assistant"},
-    {"quote":"I was looking for extra income and found a great data entry role here. Payments are always on time. Highly recommend!","author":"Amir H., Data Entry Specialist"}
-]
+    # --------------------------------------------------
+    # LOGOUT
+    # --------------------------------------------------
+    @app.route('/logout')
+    def logout():
+        session.pop('logged_in', None)
+        flash('Logged out.', 'info')
+        return redirect(url_for('home'))
 
-ABOUT_TEXT = (
-    "EasyEarn is dedicated to connecting talented individuals with flexible and rewarding remote work opportunities. "
-    "We believe everyone deserves a chance to earn on their own terms, and we strive to make that possible through "
-    "carefully curated job listings and a user-friendly platform. Our mission is to empower you to achieve financial "
-    "independence and work-life balance."
-)
+    # --------------------------------------------------
+    # HOME + CONTACT FORM
+    # --------------------------------------------------
+    @app.route('/', methods=['GET', 'POST'])
+    def home():
+        if request.method == 'POST':
+            name = request.form.get('name', '').strip()
+            email = request.form.get('email', '').strip()
+            message = request.form.get('message', '').strip()
 
-# ------------------------------------------------------------------
-# Routes
-# ------------------------------------------------------------------
-@app.route("/")
-def index():
-    return render_template(
-        "index.html",
-        states=STATES,
-        jobs=JOBS,
-        availabilities=AVAILABILITIES,
-        latest_jobs=LATEST_JOBS,
-        advantages=ADVANTAGES,
-        testimonials=TESTIMONIALS,
-        about_text=ABOUT_TEXT,
-        current_year=datetime.now().year
-    )
+            if not all([name, email, message]):
+                flash('Please fill all fields.', 'danger')
+            else:
+                try:
+                    contact = Contact(name=name, email=email, message=message)
+                    db.session.add(contact)
+                    db.session.commit()
+                    flash('Thank you! Your message has been saved.', 'success')
+                except Exception as e:
+                    flash('Error saving message.', 'danger')
+                    print(f"DB Error: {e}")
+                return redirect(url_for('home') + '#contact')
+        return render_template('index.html')
 
-# ------------------------------------------------------------------
-# API – receive the form
-# ------------------------------------------------------------------
-@app.route("/api/submit", methods=["POST"])
-def submit_form():
-    if not request.is_json:
-        abort(400, "JSON required")
+    # --------------------------------------------------
+    # ADMIN DASHBOARD
+    # --------------------------------------------------
+    @app.route('/admin')
+    @login_required
+    def admin():
+        contacts = Contact.query.order_by(Contact.timestamp.desc()).all()
+        return render_template_string('''
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8"><title>Admin Dashboard</title>
+          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+          <style>body{padding:2rem;}</style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h2>Contact Messages ({{ contacts|length }})</h2>
+              <div>
+                <a href="{{ url_for('export_csv') }}" class="btn btn-success">Export CSV</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Logout</a>
+              </div>
+            </div>
+            <div class="row">
+              {% for c in contacts %}
+              <div class="col-md-6 mb-3">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">{{ c.name }} <small class="text-muted">({{ c.email }})</small></h5>
+                    <p class="card-text"><small>{{ c.timestamp.strftime('%d %b %Y, %I:%M %p') }}</small></p>
+                    <p>{{ c.message }}</p>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </body>
+        </html>
+        ''', contacts=contacts)
 
-    data = request.get_json()
+    # --------------------------------------------------
+    # EXPORT TO CSV
+    # --------------------------------------------------
+    @app.route('/admin/export')
+    @login_required
+    def export_csv():
+        contacts = Contact.query.order_by(Contact.timestamp.asc()).all()
+        from io import StringIO, BytesIO
+        import csv
 
-    # ----> YOUR PROCESSING LOGIC HERE <----
-    # Example: save to DB, send email, call Google Sheets, etc.
-    print("Received lead:", data)   # <-- replace with real storage
+        # Use StringIO for writing strings
+        si = StringIO()
+        writer = csv.writer(si, quoting=csv.QUOTE_ALL)
 
-    # Simple validation (you can expand)
-    required = ["fullName","email","whatsapp","state","interestedJob","availability"]
-    missing = [f for f in required if not data.get(f)]
-    if missing:
-        return jsonify(success=False, message="Missing fields: " + ", ".join(missing))
+        # Header
+        writer.writerow(['ID', 'Name', 'Email', 'Message', 'Timestamp'])
 
-    # Success response
-    return jsonify(success=True, message="Thank you! We'll contact you soon.")
+        # Data
+        for c in contacts:
+            writer.writerow([
+                c.id,
+                c.name,
+                c.email,
+                c.message,
+                c.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            ])
 
-# ------------------------------------------------------------------
-# Run (debug=False in production)
-# ------------------------------------------------------------------
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+        # Convert to bytes
+        output = BytesIO()
+        output.write(si.getvalue().encode('utf-8'))
+        output.seek(0)
+
+        return send_file(
+            output,
+            mimetype='text/csv',
+            as_attachment=True,
+            download_name=f"contacts_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        )
+    return app
+if __name__ == '__main__':
+    # Debug mode: True for development
+    app = create_app()
+    app.run(host='0.0.0.0', port=5001, debug=True)
